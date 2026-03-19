@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🏀 2026 Office March Madness</title>
+  <style>
+    :root {
+      --navy:   #1a3b6f;
+      --orange: #e8622a;
+      --gold:   #f5a623;
+      --bg:     #0f1923;
+      --card:   #1c2a3a;
+      --card2:  #243444;
+      --text:   #e8edf2;
+      --muted:  #8899aa;
+      --green:  #2ecc71;
+      --red:    #e74c3c;
+      --border: rgba(255,255,255,0.07);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, var(--navy) 0%, #0d2548 100%);
+      padding: 20px 16px 16px;
+      text-align: center;
+      border-bottom: 3px solid var(--orange);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    header h1 { font-size: clamp(18px, 5vw, 26px); font-weight: 800; letter-spacing: -0.3px; }
+    header h1 span { color: var(--orange); }
+    .header-meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .progress-bar-wrap {
+      margin: 10px auto 0; max-width: 360px;
+      background: rgba(255,255,255,0.1); border-radius: 20px; height: 8px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--orange), var(--gold));
+      height: 100%; border-radius: 20px;
+      transition: width 0.6s ease;
+    }
+
+    /* ── Nav tabs ────────────────────────────────────────────────────────── */
+    nav {
+      display: flex; overflow-x: auto; gap: 0;
+      background: var(--card); border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+    nav a {
+      flex-shrink: 0; padding: 12px 18px;
+      color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 600;
+      border-bottom: 3px solid transparent; white-space: nowrap;
+      transition: all 0.2s;
+    }
+    nav a:hover { color: var(--text); }
+    nav a.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+    /* ── Main layout ─────────────────────────────────────────────────────── */
+    main { max-width: 700px; margin: 0 auto; padding: 16px; }
+    section { display: none; }
+    section.active { display: block; }
+
+    /* ── Leaderboard ─────────────────────────────────────────────────────── */
+    .lb-card {
+      background: var(--card); border-radius: 14px; overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3); margin-bottom: 16px;
+    }
+    .lb-row {
+      display: grid; grid-template-columns: 44px 1fr 80px 70px;
+      align-items: center; padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s; cursor: pointer;
+    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row:hover { background: var(--card2); }
+    .lb-row.rank-1 { background: linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.05)); }
+    .lb-row.rank-2 { background: linear-gradient(135deg, rgba(180,180,180,0.1), rgba(180,180,180,0.03)); }
+    .lb-row.rank-3 { background: linear-gradient(135deg, rgba(205,127,50,0.1), rgba(205,127,50,0.03)); }
+
+    .rank-badge {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px;
+    }
+    .rank-1 .rank-badge { background: rgba(245,166,35,0.2); color: #f5a623; font-size: 18px; }
+    .rank-2 .rank-badge { background: rgba(180,180,180,0.15); color: #bbb; font-size: 18px; }
+    .rank-3 .rank-badge { background: rgba(205,127,50,0.15); color: #cd7f32; font-size: 18px; }
+    .rank-other .rank-badge { background: rgba(255,255,255,0.07); color: var(--muted); }
+
+    .lb-name { font-weight: 700; font-size: 16px; }
+    .lb-champ {
+      font-size: 11px; color: var(--muted); margin-top: 2px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .lb-champ::before { content: "🏆"; font-size: 10px; }
+
+    .lb-score { text-align: right; }
+    .lb-score-num { font-size: 22px; font-weight: 800; color: var(--orange); }
+    .lb-score-label { font-size: 10px; color: var(--muted); }
+
+    .lb-max { text-align: right; }
+    .lb-max-num { font-size: 13px; font-weight: 600; color: var(--text); }
+    .lb-max-label { font-size: 10px; color: var(--muted); }
+    .lb-max-rem { font-size: 11px; color: var(--green); }
+
+    /* Header row */
+    .lb-header {
+      display: grid; grid-template-columns: 44px 1fr 80px 70px;
+      padding: 8px 16px;
+      background: var(--navy); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+    }
+
+    /* ── Bracket (per player) ────────────────────────────────────────────── */
+    .player-tabs {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .player-tab {
+      padding: 8px 16px; border-radius: 20px;
+      background: var(--card); color: var(--muted);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.2s;
+    }
+    .player-tab.active {
+      border-color: var(--orange); color: var(--orange);
+      background: rgba(232,98,42,0.1);
+    }
+
+    .bracket-section { margin-bottom: 20px; }
+    .round-header {
+      background: linear-gradient(135deg, var(--navy), #0d2548);
+      padding: 10px 14px; border-radius: 10px 10px 0 0;
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--gold);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .round-pts { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+    .game-row {
+      display: grid; grid-template-columns: 1fr auto auto;
+      align-items: center; padding: 10px 14px;
+      background: var(--card); border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+    .game-row:last-child { border-bottom: none; border-radius: 0 0 10px 10px; }
+
+    .game-matchup { font-size: 11px; color: var(--muted); }
+    .game-pick { font-size: 14px; font-weight: 700; }
+    .game-pick.correct { color: var(--green); }
+    .game-pick.wrong   { color: var(--red); text-decoration: line-through; }
+    .game-pick.pending { color: var(--text); }
+
+    .game-result {
+      font-size: 11px; padding: 3px 8px; border-radius: 20px;
+      font-weight: 700; white-space: nowrap;
+    }
+    .result-correct { background: rgba(46,204,113,0.15); color: var(--green); }
+    .result-wrong   { background: rgba(231,76,60,0.15);  color: var(--red); }
+    .result-pending { background: rgba(255,255,255,0.07); color: var(--muted); }
+
+    .game-pts { font-size: 13px; font-weight: 700; color: var(--orange); min-width: 28px; text-align: right; }
+
+    /* ── Score summary card ──────────────────────────────────────────────── */
+    .score-summary {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px; margin-bottom: 16px;
+    }
+    .score-card {
+      background: var(--card); border-radius: 12px; padding: 14px;
+      text-align: center;
+    }
+    .score-card-num { font-size: 28px; font-weight: 800; color: var(--orange); }
+    .score-card-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Results tab ─────────────────────────────────────────────────────── */
+    .results-round { margin-bottom: 20px; }
+    .result-game-row {
+      display: grid; grid-template-columns: 1fr auto;
+      padding: 10px 14px; background: var(--card);
+      border-bottom: 1px solid var(--border); gap: 8px;
+      align-items: center;
+    }
+    .result-game-row:last-child { border-bottom: none; border-radius: 0 0 10px 10px; }
+    .result-matchup { font-size: 13px; }
+    .result-winner-pill {
+      font-size: 12px; font-weight: 700; padding: 4px 12px;
+      border-radius: 20px; background: rgba(46,204,113,0.15); color: var(--green);
+      white-space: nowrap;
+    }
+    .result-pending-pill {
+      font-size: 11px; padding: 4px 10px; border-radius: 20px;
+      background: rgba(255,255,255,0.06); color: var(--muted);
+    }
+
+    /* ── Comparison tab ──────────────────────────────────────────────────── */
+    .comparison-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .comparison-table th {
+      background: var(--navy); padding: 8px 6px;
+      text-align: center; font-size: 11px; color: var(--muted);
+      position: sticky; top: 0;
+    }
+    .comparison-table td {
+      padding: 8px 6px; text-align: center;
+      border-bottom: 1px solid var(--border); background: var(--card);
+    }
+    .comparison-table tr:hover td { background: var(--card2); }
+    .cell-correct { color: var(--green); font-weight: 700; }
+    .cell-wrong   { color: var(--red); }
+    .cell-pending { color: var(--muted); }
+    .section-row td {
+      background: var(--navy) !important;
+      color: var(--gold); font-weight: 700;
+      font-size: 10px; text-transform: uppercase;
+      letter-spacing: 1px; padding: 5px 6px;
+    }
+    .matchup-cell { text-align: left !important; color: var(--muted); font-size: 11px; }
+    .actual-cell  { color: var(--green); font-weight: 700; }
+
+    /* ── Empty state ─────────────────────────────────────────────────────── */
+    .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+
+    /* ── Last updated ────────────────────────────────────────────────────── */
+    .last-updated {
+      text-align: center; font-size: 11px; color: var(--muted);
+      padding: 12px; margin-top: 8px;
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .lb-row { grid-template-columns: 40px 1fr 72px 60px; padding: 12px 12px; }
+      .lb-score-num { font-size: 19px; }
+      .score-summary { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .score-card-num { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏀 2026 <span>MARCH MADNESS</span> 🏀</h1>
+  <div class="header-meta">
+    {{ data.completed_games }} / {{ data.total_games }} games complete
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" style="width: {{ (data.completed_games / data.total_games * 100) | round(1) }}%"></div>
+  </div>
+</header>
+
+<nav id="main-nav">
+  <a href="#" class="active" onclick="showTab('leaderboard',this)">🏆 Leaderboard</a>
+  <a href="#" onclick="showTab('brackets',this)">📋 Brackets</a>
+  <a href="#" onclick="showTab('results',this)">🎯 Results</a>
+  <a href="#" onclick="showTab('comparison',this)">📊 Compare</a>
+</nav>
+
+<main>
+
+  <!-- ── LEADERBOARD ──────────────────────────────────────────────────── -->
+  <section id="leaderboard" class="active">
+    <div class="lb-card">
+      <div class="lb-header">
+        <div></div><div>Player</div>
+        <div style="text-align:right">Score</div>
+        <div style="text-align:right">Max</div>
+      </div>
+      {% set medal = {1:"🥇",2:"🥈",3:"🥉"} %}
+      {% for entry in data.leaderboard %}
+      <div class="lb-row rank-{{ entry.rank if entry.rank <= 3 else 'other' }}"
+           onclick="selectPlayer('{{ entry.name }}')">
+        <div>
+          <div class="rank-badge">{{ medal.get(entry.rank, entry.rank) }}</div>
+        </div>
+        <div>
+          <div class="lb-name">{{ entry.name }}</div>
+          <div class="lb-champ">{{ entry.champion_pick }}</div>
+        </div>
+        <div class="lb-score">
+          <div class="lb-score-num">{{ entry.total }}</div>
+          <div class="lb-score-label">pts</div>
+        </div>
+        <div class="lb-max">
+          <div class="lb-max-num">{{ entry.max_possible }}</div>
+          <div class="lb-max-label">max</div>
+          <div class="lb-max-rem">+{{ entry.pts_remaining }} left</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="last-updated">Last updated: {{ data.last_updated }}</div>
+  </section>
+
+  <!-- ── BRACKETS ─────────────────────────────────────────────────────── -->
+  <section id="brackets">
+    <div class="player-tabs">
+      {% for p in players %}
+      <div class="player-tab {% if loop.first %}active{% endif %}"
+           onclick="selectPlayer('{{ p }}', true)" id="tab-{{ p }}">{{ p }}</div>
+      {% endfor %}
+    </div>
+
+    {% for p in players %}
+    <div id="bracket-{{ p }}" style="display:{% if loop.first %}block{% else %}none{% endif %}">
+
+      {# Score summary #}
+      {% set pl = data.players[p] %}
+      {% set total    = pl.total %}
+      {% set pts_rem  = pl.pts_remaining %}
+      {% set max_pos  = pl.max_possible %}
+      <div class="score-summary">
+        <div class="score-card">
+          <div class="score-card-num">{{ total }}</div>
+          <div class="score-card-label">Current</div>
+        </div>
+        <div class="score-card">
+          <div class="score-card-num">{{ pts_rem }}</div>
+          <div class="score-card-label">Remaining</div>
+        </div>
+        <div class="score-card">
+          <div class="score-card-num">{{ max_pos }}</div>
+          <div class="score-card-label">Max Possible</div>
+        </div>
+      </div>
+
+      {# Picks by round #}
+      {% set round_labels = {
+          "Round of 64": "Round of 64 · 1 pt each",
+          "Round of 32": "Round of 32 · 2 pts each",
+          "Sweet 16":    "Sweet Sixteen · 4 pts each",
+          "Elite 8":     "Elite Eight · 8 pts each",
+          "Final 4":     "Final Four · 16 pts each",
+          "Championship":"Championship · 32 pts"
+      } %}
+      {% set ns = namespace(cur_round=None) %}
+      {% for pick in pl.picks %}
+        {% if pick.round != ns.cur_round %}
+          {% if ns.cur_round is not none %}</div></div>{% endif %}
+          {% set ns.cur_round = pick.round %}
+          <div class="bracket-section">
+          <div class="round-header">
+            {{ round_labels.get(pick.round, pick.round) }}
+          </div>
+          <div>
+        {% endif %}
+
+        <div class="game-row">
+          <div>
+            <div class="game-matchup">{{ pick.matchup }}</div>
+            <div class="game-pick
+              {% if pick.result == 1 %}correct
+              {% elif pick.result == 0 %}wrong
+              {% else %}pending{% endif %}">
+              {{ pick.pick or '—' }}
+            </div>
+          </div>
+          <div>
+            <span class="game-result
+              {% if pick.result == 1 %}result-correct
+              {% elif pick.result == 0 %}result-wrong
+              {% else %}result-pending{% endif %}">
+              {% if pick.result == 1 %}✓ Correct
+              {% elif pick.result == 0 %}✗ Wrong
+              {% else %}Pending{% endif %}
+            </span>
+          </div>
+          <div class="game-pts">
+            {% if pick.result == 1 %}+{{ pick.pts_value }}
+            {% elif pick.result == 0 %}0
+            {% else %}—{% endif %}
+          </div>
+        </div>
+
+      {% endfor %}
+      {% if ns.cur_round is not none %}</div></div>{% endif %}
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- ── RESULTS ───────────────────────────────────────────────────────── -->
+  <section id="results">
+    {% set round_order = ["Round of 64","Round of 32","Sweet 16","Elite 8","Final 4","Championship"] %}
+    {% set round_labels = {
+        "Round of 64": "Round of 64",
+        "Round of 32": "Round of 32",
+        "Sweet 16":    "Sweet Sixteen",
+        "Elite 8":     "Elite Eight",
+        "Final 4":     "Final Four",
+        "Championship":"Championship"
+    } %}
+
+    {% for rnd in round_order %}
+      {% set games_in_round = data.results.values() | selectattr("round","equalto",rnd) | list %}
+      {% if games_in_round %}
+      <div class="results-round">
+        <div class="round-header">{{ round_labels.get(rnd, rnd) }}</div>
+        {% for game in games_in_round %}
+        <div class="result-game-row">
+          <div class="result-matchup">{{ game.matchup }}</div>
+          {% if game.winner %}
+            <span class="result-winner-pill">✓ {{ game.winner }}</span>
+          {% else %}
+            <span class="result-pending-pill">Pending</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endfor %}
+  </section>
+
+  <!-- ── COMPARISON ────────────────────────────────────────────────────── -->
+  <section id="comparison">
+    <div style="overflow-x:auto; border-radius:10px;">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th style="text-align:left; min-width:140px;">Matchup</th>
+          <th>Actual</th>
+          {% for p in players %}<th>{{ p }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% set round_order = ["Round of 64","Round of 32","Sweet 16","Elite 8","Final 4","Championship"] %}
+        {% set round_labels = {"Round of 64":"R64","Round of 32":"R32","Sweet 16":"S16","Elite 8":"E8","Final 4":"F4","Championship":"CHAMP"} %}
+        {% set ns = namespace(cur_round=None) %}
+
+        {% for game_id, game in data.results.items() %}
+          {% if game.round != ns.cur_round %}
+            {% set ns.cur_round = game.round %}
+            <tr class="section-row">
+              <td colspan="{{ 2 + players|length }}">{{ game.round }}</td>
+            </tr>
+          {% endif %}
+          <tr>
+            <td class="matchup-cell">{{ game.matchup }}</td>
+            <td class="actual-cell">{{ game.winner or '—' }}</td>
+            {% for p in players %}
+              {% set pick_obj = data.players[p].picks | selectattr("game_id","equalto",game_id) | first | default(None) %}
+              {% if pick_obj %}
+                <td class="
+                  {% if pick_obj.result == 1 %}cell-correct
+                  {% elif pick_obj.result == 0 %}cell-wrong
+                  {% else %}cell-pending{% endif %}">
+                  {{ pick_obj.pick or '—' }}
+                </td>
+              {% else %}
+                <td class="cell-pending">—</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function showTab(id, el) {
+    document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll("nav a").forEach(a => a.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    el.classList.add("active");
+  }
+
+  function selectPlayer(name, switchTab=false) {
+    // Highlight tab
+    document.querySelectorAll(".player-tab").forEach(t => t.classList.remove("active"));
+    const tab = document.getElementById("tab-" + name);
+    if (tab) tab.classList.add("active");
+    // Show bracket
+    document.querySelectorAll("[id^='bracket-']").forEach(b => b.style.display="none");
+    const bracket = document.getElementById("bracket-" + name);
+    if (bracket) bracket.style.display = "block";
+    // Switch to brackets tab if called from leaderboard
+    if (switchTab) {
+      const navLink = document.querySelector("nav a:nth-child(2)");
+      showTab("brackets", navLink);
+    }
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  // Auto-refresh every 3 minutes
+  setInterval(() => window.location.reload(), 180000);
+</script>
+
+</body>
+</html>
